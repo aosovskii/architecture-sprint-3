@@ -1,0 +1,55 @@
+@startuml
+!pragma layout smetana
+
+entity House {
+  * house_id : INT
+  --
+  owner_id : INT
+  address : VARCHAR(255)
+  latitude : DECIMAL(10, 6)
+  longitude : DECIMAL(10, 6)
+}
+
+
+entity TelemetryData {
+  * telemetry_id : INT
+  --
+  device_id : INT
+  recorded_at : TIMESTAMP
+  data : JSON
+}
+entity User {
+  * user_id : INT
+  --
+  username : VARCHAR(50) UNIQUE
+  email : VARCHAR(100) UNIQUE
+  registration_date : TIMESTAMP
+}
+
+
+entity Device {
+  * device_id : INT
+  --
+  device_type_id : INT
+  house_id : INT
+  serial_number : VARCHAR(50) UNIQUE
+  status : ENUM('ONLINE', 'OFFLINE', 'MAINTENANCE')
+  last_update : TIMESTAMP
+}
+
+entity DeviceType {
+  * device_type_id : INT
+  --
+  type_name : VARCHAR(50) UNIQUE
+  description : TEXT
+  manufacturer : VARCHAR(50)
+}
+
+
+
+TelemetryData ||--{ Device : Records
+House }|--{ User : Owns
+
+Device }|--{ DeviceType : Is of type
+Device }|--{ House : Located in
+@enduml

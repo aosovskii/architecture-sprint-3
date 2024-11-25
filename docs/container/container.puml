@@ -1,0 +1,48 @@
+@startuml
+!pragma layout smetana
+
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+title Система "Умный Дом" [Диаграмма Контейнеров]
+
+System_Boundary(smart_home_system, "Система Умный Дом"){
+
+    Container(kafka, "Шина Событий", "Kafka", "Обеспечивает обмен данными между сервисами в асинхронном режиме")
+    Container(api_gateway, "API Шлюз", "Kong", "Маршрутизация и балансировка запросов, аутентификация")
+
+
+    Container(device_service, "Сервис Управления Устройствами", "Python, FastAPI, Kafka Consumer", "Управляет умными устройствами и их настройками")
+    Container(device_database, "База Данных Устройств", "PostgreSQL", "Хранит информацию об устройствах")
+
+    Container(telemetry_service, "Сервис Телеметрии", "Python, FastAPI, Kafka Consumer", "Собирает и обрабатывает данные телеметрии")
+    Container(telemetry_database, "База Данных Телеметрии", "ClickHouse", "Хранит данные телеметрии")
+
+    Container(web_app, "Веб-Приложение", "JavaScript, Angular", "Интерфейс для управления системой через браузер")
+    Container(mobile_app, "Мобильное Приложение", "Xamarin", "Интерфейс для управления системой с мобильных устройств")
+}
+
+Person(user, "Пользователь", "Взаимодействует с системой")
+System_Ext(smart_device, "Умное Устройство", "Датчики и исполнительные механизмы")
+
+Rel(user, web_app, "Использует веб-интерфейс")
+Rel(user, mobile_app, "Использует мобильное приложение")
+
+Rel(web_app, api_gateway, "Запросы управления и телеметрии")
+Rel(mobile_app, api_gateway, "Запросы управления и телеметрии")
+
+Rel(api_gateway, device_service, "Команды управления устройствами")
+Rel(api_gateway, kafka, "Публикует данные с датчиков")
+Rel(api_gateway, telemetry_service, "Запросы телеметрии")
+
+
+Rel(kafka, telemetry_service, "Данные телеметрии")
+Rel(kafka, device_service, "Уведомления от датчиков")
+
+Rel(device_service, smart_device, "Отправляет команды")
+Rel(device_service, device_database, "Чтение/запись данных устройств")
+
+Rel(smart_device, api_gateway, "Поставляет данные с датчиков")
+Rel(telemetry_service, telemetry_database, "Чтение/запись данных телеметрии")
+
+
+@enduml

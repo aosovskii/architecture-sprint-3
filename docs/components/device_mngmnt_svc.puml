@@ -1,0 +1,30 @@
+@startuml
+!pragma layout smetana
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+title Сервис Управления Устройствами [Диаграмма Компонентов]
+
+System_Ext(smart_device, "Умное Устройство", "Датчики и исполнительные механизмы")
+Container(api_gateway, "API Шлюз", "Kong", "Обеспечивает маршрутизацию и балансировку запросов")
+Container(kafka, "Шина Событий", "Kafka", "Гарантирует асинхронный обмен сообщениями")
+Container(device_database, "База Данных Устройств", "PostgreSQL", "Хранилище данных об устройствах")
+
+Container(device_service, "Сервис Управления Устройствами"){
+    Component(device_repository_layer, "Слой Работы с Данными", "", "Отвечает за доступ к базе данных")
+    Component(device_consumer, "Обработчик Сообщений", "KafkaConsumer", "Получает и обрабатывает данные из шины событий")
+    Component(device_service_layer, "Бизнес-Логика", "", "Реализует основные функции управления")
+    Component(device_api, "Контроллер API", "FastAPI", "Обрабатывает внешние запросы управления")
+}
+
+Rel(kafka, device_consumer, "Поставляет данные от устройств")
+Rel(api_gateway, device_api, "Передает команды управления")
+
+Rel(device_api, device_service_layer, "Активирует бизнес-логику")
+Rel(device_consumer, device_service_layer, "Запускает бизнес-процессы")
+
+Rel(device_service_layer, device_repository_layer, "Выполняет операции чтения/записи")
+Rel(device_service_layer, smart_device, "Инициирует выполнение команд")
+
+Rel(device_repository_layer, device_database, "Осуществляет чтение и запись данных")
+
+@enduml

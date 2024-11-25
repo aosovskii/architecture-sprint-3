@@ -1,0 +1,19 @@
+@startuml
+!pragma layout smetana
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+Person(user, "Владелец дома с системой отопления", "Пользователь, который управляет системой отопления через веб-интерфейс")
+
+System(hs, "Система отопления", "Управляет отоплением дома")
+System_Ext(sensors, "Датчики температуры", "Передают  данные о температуре в систему отопления")
+
+'
+System_Ext(web, "Пользовательское приложения", "Web-приложение позволяющее владельцам домов взаимодействовать с системой отопления")
+System_Ext(hd, "Устройства отопления", "Устройства отапливающие помещения")
+'
+Rel(user, web, "Использует", "HTTP/HTTPS")
+Rel(web, hs, "Взаимодействует", "REST API")
+Rel(hs, sensors, "Запрашивает данные", "REST API")
+Rel(hs, hd, "Управляет отоплением", "REST API")
+
+@enduml

@@ -1,0 +1,27 @@
+@startuml
+!pragma layout smetana
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+title Сервис Телеметрии [Диаграмма Компонентов]
+
+Container(kafka, "Шина Событий", "Kafka", "Обеспечивает асинхронный обмен данными")
+Container(telemetry_database, "Хранилище Телеметрии", "ClickHouse", "База данных для сервиса телеметрии")
+Container(api_gateway, "API Шлюз", "Kong", "Маршрутизирует и балансирует запросы")
+
+Container(telemetry_service, "Сервис Телеметрии"){
+    Component(telemetry_consumer, "Обработчик Событий", "KafkaConsumer", "Получает и обрабатывает сообщения из шины событий")
+    Component(telemetry_repository_layer, "Уровень Доступа к Данным", "", "Абстрагирует работу с хранилищем данных")
+    Component(telemetry_api, "Контроллер API", "FastAPI", "Принимает и обрабатывает HTTP запросы")
+    Component(telemetry_service_layer, "Бизнес-Логика", "", "Реализует основную функциональность сервиса")
+}
+
+Rel(api_gateway, telemetry_api, "Запросы на получение данных телеметрии")
+Rel(kafka, telemetry_consumer, "Поставляет данные телеметрии")
+
+Rel(telemetry_consumer, telemetry_service_layer, "Передает данные для обработки")
+Rel(telemetry_api, telemetry_service_layer, "Инициирует выполнение бизнес-логики")
+
+Rel(telemetry_service_layer, telemetry_repository_layer, "Взаимодействует для чтения/записи данных")
+
+Rel(telemetry_repository_layer, telemetry_database, "Операции чтения и записи телеметрических данных")
+@enduml
