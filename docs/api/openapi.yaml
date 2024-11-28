@@ -1,0 +1,154 @@
+openapi: 3.1.0
+info:
+  title: API для Системы "Умный Дом"
+  version: '1.0'
+paths:
+  /devices/{device_id}/telemetry/latest:
+    get:
+      summary: Получить последние данные телеметрии
+      parameters:
+        - in: path
+          name: device_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Успешный запрос
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TelemetryData'
+        '404':
+          description: Устройство не найдено
+        '500':
+          description: Ошибка сервера
+  /devices/{device_id}:
+    get:
+      summary: Получение данных об устройстве
+      parameters:
+        - name: device_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Данные успешно получены
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Device'
+        '404':
+          description: Устройство не найдено.
+        '500':
+          description: Внутренняя ошибка сервера
+  /devices/{device_id}/status:
+    put:
+      summary: Установка статуса устройства
+      parameters:
+        - in: path
+          name: device_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: boolean
+      responses:
+        '200':
+          description: Статус успешно обновлен
+        '404':
+          description: Устройство не обнаружено
+        '500':
+          description: Ошибка сервера при обновлении статуса
+  /devices/{device_id}/commands:
+    post:
+      summary: Отправка команды устройству
+      parameters:
+        - in: path
+          name: device_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceCommand'
+      responses:
+        '200':
+          description: Команда отправлена
+        '404':
+          description: Устройство не найдено, команда не отправлена
+        '500':
+          description: Ошибка сервера при отправке команды
+  /devices/{device_id}/telemetry:
+    get:
+      summary: Получить историю телеметрии
+      parameters:
+        - in: path
+          name: device_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Данные телеметрии успешно получены
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TelemetryData'
+        '404':
+          description: Устройство не найдено, данные не получены
+        '500':
+          description: Ошибка сервера при получении данных телеметрии
+
+components:
+  schemas:
+    Device:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Идентификатор устройства
+        name:
+          type: string
+          description: Наименование устройства
+        type:
+          type: string
+          description: Тип устройства
+        status:
+          type: boolean
+          description: Статус устройства (включено/выключено)
+    DeviceCommand:
+      type: object
+      properties:
+        command:
+          type: string
+          description: Команда для выполнения
+        arguments:
+          type: object
+          description: Аргументы команды
+    TelemetryData:
+      type: object
+      properties:
+        datetime:
+          type: string
+          format: date-time
+          description: Время и дата измерения
+        data:
+          type: object
+          description: Данные телеметрии
+        device_id:
+          type: integer
+          description: Идентификатор устройства
