@@ -1,6 +1,6 @@
 @startuml
 !pragma layout smetana
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Context.puml
 
 Person(user, "Владелец дома с системой отопления", "Пользователь, который управляет системой отопления через веб-интерфейс")
 

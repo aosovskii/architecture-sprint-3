@@ -4,20 +4,11 @@
 entity House {
   * house_id : INT
   --
-  owner_id : INT
   address : VARCHAR(255)
   latitude : DECIMAL(10, 6)
   longitude : DECIMAL(10, 6)
 }
 
-
-entity TelemetryData {
-  * telemetry_id : INT
-  --
-  device_id : INT
-  recorded_at : TIMESTAMP
-  data : JSON
-}
 entity User {
   * user_id : INT
   --
@@ -26,6 +17,13 @@ entity User {
   registration_date : TIMESTAMP
 }
 
+entity HouseOwnership {
+  * house_id : INT
+  * user_id : INT
+  --
+  ownership_start : DATE
+  ownership_end : DATE
+}
 
 entity Device {
   * device_id : INT
@@ -45,11 +43,18 @@ entity DeviceType {
   manufacturer : VARCHAR(50)
 }
 
+entity TelemetryData {
+  * telemetry_id : INT
+  --
+  device_id : INT
+  recorded_at : TIMESTAMP
+  data : JSON
+}
 
+House ||--o{ HouseOwnership : "Owned by"
+User ||--o{ HouseOwnership : "Owns"
 
-TelemetryData ||--{ Device : Records
-House }|--{ User : Owns
-
-Device }|--{ DeviceType : Is of type
-Device }|--{ House : Located in
+House ||--o{ Device : "Contains"
+Device ||--o{ TelemetryData : "Generates"
+Device ||--o| DeviceType : "Has type"
 @enduml

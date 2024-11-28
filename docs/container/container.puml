@@ -5,11 +5,16 @@
 
 title Система "Умный Дом" [Диаграмма Контейнеров]
 
-System_Boundary(smart_home_system, "Система Умный Дом"){
+System_Boundary(smart_home_system, "Система Умный Дом") {
 
     Container(kafka, "Шина Событий", "Kafka", "Обеспечивает обмен данными между сервисами в асинхронном режиме")
     Container(api_gateway, "API Шлюз", "Kong", "Маршрутизация и балансировка запросов, аутентификация")
 
+    Container(user_service, "Сервис Управления Пользователями", "Python, FastAPI", "Регистрация, авторизация, управление учетными записями")
+    Container(user_database, "База Данных Пользователей", "PostgreSQL", "Хранение данных пользователей")
+
+    Container(house_service, "Сервис Управления Домами", "Python, FastAPI", "Управление домами и их владельцами")
+    Container(house_database, "База Данных Домов", "PostgreSQL", "Хранение информации о домах")
 
     Container(device_service, "Сервис Управления Устройствами", "Python, FastAPI, Kafka Consumer", "Управляет умными устройствами и их настройками")
     Container(device_database, "База Данных Устройств", "PostgreSQL", "Хранит информацию об устройствах")
@@ -17,32 +22,38 @@ System_Boundary(smart_home_system, "Система Умный Дом"){
     Container(telemetry_service, "Сервис Телеметрии", "Python, FastAPI, Kafka Consumer", "Собирает и обрабатывает данные телеметрии")
     Container(telemetry_database, "База Данных Телеметрии", "ClickHouse", "Хранит данные телеметрии")
 
-    Container(web_app, "Веб-Приложение", "JavaScript, Angular", "Интерфейс для управления системой через браузер")
-    Container(mobile_app, "Мобильное Приложение", "Xamarin", "Интерфейс для управления системой с мобильных устройств")
+    Container(automation_service, "Сервис Сценариев Автоматизации", "Python, FastAPI, Kafka Consumer", "Обрабатывает сценарии автоматизации")
+    Container(scenario_database, "База Данных Сценариев", "PostgreSQL", "Хранение сценариев автоматизации")
+
+    Container(web_app, "Веб-Приложение", "JavaScript, Angular", "Интерфейс управления системой через браузер")
+    Container(mobile_app, "Мобильное Приложение", "Xamarin", "Интерфейс управления системой с мобильных устройств")
 }
 
 Person(user, "Пользователь", "Взаимодействует с системой")
 System_Ext(smart_device, "Умное Устройство", "Датчики и исполнительные механизмы")
 
-Rel(user, web_app, "Использует веб-интерфейс")
-Rel(user, mobile_app, "Использует мобильное приложение")
+Rel(user, web_app, "Взаимодействует")
+Rel(user, mobile_app, "Взаимодействует")
 
-Rel(web_app, api_gateway, "Запросы управления и телеметрии")
-Rel(mobile_app, api_gateway, "Запросы управления и телеметрии")
+Rel(web_app, api_gateway, "Запросы управления")
+Rel(mobile_app, api_gateway, "Запросы управления")
+
+Rel(api_gateway, user_service, "Регистрация/авторизация")
+Rel(user_service, user_database, "Чтение/запись пользователей")
+
+Rel(api_gateway, house_service, "Управление домами")
+Rel(house_service, house_database, "Чтение/запись информации о домах")
 
 Rel(api_gateway, device_service, "Команды управления устройствами")
-Rel(api_gateway, kafka, "Публикует данные с датчиков")
-Rel(api_gateway, telemetry_service, "Запросы телеметрии")
-
-
-Rel(kafka, telemetry_service, "Данные телеметрии")
-Rel(kafka, device_service, "Уведомления от датчиков")
-
-Rel(device_service, smart_device, "Отправляет команды")
 Rel(device_service, device_database, "Чтение/запись данных устройств")
 
-Rel(smart_device, api_gateway, "Поставляет данные с датчиков")
-Rel(telemetry_service, telemetry_database, "Чтение/запись данных телеметрии")
+Rel(api_gateway, telemetry_service, "Запросы данных телеметрии")
+Rel(telemetry_service, telemetry_database, "Чтение/запись телеметрии")
 
+Rel(kafka, telemetry_service, "Данные телеметрии")
+Rel(kafka, automation_service, "Триггеры для сценариев")
+Rel(automation_service, scenario_database, "Чтение/запись сценариев")
 
+Rel(device_service, smart_device, "Отправка команд")
+Rel(smart_device, kafka, "Данные событий")
 @enduml
